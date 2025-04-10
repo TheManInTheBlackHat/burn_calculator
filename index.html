@@ -7,7 +7,7 @@
   <style>
     body {
       background-color: black;
-      color: #ff3333; /* Split difference red */
+      color: #ff3333;
       font-family: 'Courier New', Courier, monospace;
       text-align: center;
       overflow: hidden;
@@ -52,16 +52,14 @@
   <div class="counter" id="timeCounter"></div>
 
   <script>
-    // Start time already elapsed in minutes
-    const startElapsedMinutes = 111;
+    const totalValue = 1_000_000_000_000; // 1 Trillion
+    const percentPer15Min = 0.001; // 0.1% as decimal
+    const burnPerMinute = (totalValue * percentPer15Min) / 15; // Per minute burn
 
-    // Burn rate calculation
-    const burnPerMinute = 1000000000 / 150; // $1,000,000,000 burn over 15 minutes (0.1%)
-    let elapsedMinutes = startElapsedMinutes;
+    let elapsedMinutes = 111; // Starting point (1 hr 51 min)
 
     function updateCounter() {
-      elapsedMinutes++;
-      const totalBurn = elapsedMinutes * burnPerMinute;
+      const totalBurn = burnPerMinute * elapsedMinutes;
       const displayLoss = totalBurn.toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -74,6 +72,8 @@
 
       document.getElementById('moneyCounter').textContent = `-${displayLoss}`;
       document.getElementById('timeCounter').textContent = displayTime;
+
+      elapsedMinutes++;
     }
 
     setInterval(updateCounter, 60000); // Update every minute
