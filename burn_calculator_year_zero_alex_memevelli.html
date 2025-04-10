@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BURN RATE</title>
+    <style>
+        body {
+            background-color: black;
+            color: #ff3333; /* Split difference red between bright red and dark red */
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ff3333;
+            margin: 0 0 20px 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .counter {
+            font-size: 3em;
+            margin: 0 0 20px 0;
+            color: #ff3333;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            margin: 0 0 20px 0;
+            color: #ff3333;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            color: #ff3333;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>BURN RATE</h1>
+    <div class="counter" id="moneyCounter">$0</div>
+    <div class="timer" id="timeCounter">52:00</div>
+    <canvas></canvas>
+    <div class="footer">
+        Every second you hesitate is compounding loss. The vault is bleeding. The clock doesn’t stop.
+    </div>
+
+    <script>
+        let startTime = Date.now() - (52 * 60 * 1000);
+        const baseline = 1_000_000_000_000; // $1 trillion
+        const lossRatePerMinute = baseline * 0.001 / 15; // 0.1% per 15 mins
+
+        function updateCounter() {
+            const elapsedMs = Date.now() - startTime;
+            const elapsedMinutes = elapsedMs / (1000 * 60);
+            const loss = elapsedMinutes * lossRatePerMinute;
+            const displayLoss = Math.floor(loss).toLocaleString();
+
+            const minutes = Math.floor(elapsedMinutes);
+            const seconds = Math.floor((elapsedMinutes - minutes) * 60);
+            const displayTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            document.getElementById('moneyCounter').textContent = `-$${displayLoss}`;
+            document.getElementById('timeCounter').textContent = displayTime;
+        }
+
+        setInterval(updateCounter, 1000);
+
+        // Matrix effect
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+
+        const symbols = "$¢₿?".split("");
+        const fontSize = 20;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#ff3333";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = symbols[Math.floor(Math.random() * symbols.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 75);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
